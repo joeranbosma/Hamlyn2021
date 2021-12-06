@@ -4,3 +4,5 @@ SimpleITK==1.2.4
 scipy==1.7.1
 opencv-python==4.5.4.60
 matplotlib==3.5.0
+torch
+torchvision

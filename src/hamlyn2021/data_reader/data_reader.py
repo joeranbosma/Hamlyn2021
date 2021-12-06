@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from typing import Tuple
 
 
 def read_input_image(location: str, normalise: bool = True) -> np.ndarray:
@@ -87,7 +88,10 @@ def read_depth_sequence(location: str, shape=(256, 512), normalise=True) -> np.n
     return data
 
 
-def read_sequence(input_dir: str, depth_dir: str, input_shape=(256, 512, 3), depth_shape=(256, 512)) -> np.ndarray:
+def read_sequence(input_dir: str,
+                  depth_dir: str,
+                  input_shape=(256, 512, 3),
+                  depth_shape=(256, 512)) -> Tuple[np.ndarray, np.ndarray]:
     """
     Read input images and depth maps, stored as png/exr images in the specified folders.
     :param input_dir: str, path to input images.
@@ -99,10 +103,10 @@ def read_sequence(input_dir: str, depth_dir: str, input_shape=(256, 512, 3), dep
     - input data, shape: (num. timepoints, height, width, channels)
     - depth data, shape: (num. timepoints, height, width)
     """
-    inputs = read_input_sequence(location=input_dir, shape=input_shape)
+    images = read_input_sequence(location=input_dir, shape=input_shape)
     labels = read_depth_sequence(location=depth_dir, shape=depth_shape)
 
-    return inputs, labels
+    return images, labels
 
 
 if __name__ == "__main__":
