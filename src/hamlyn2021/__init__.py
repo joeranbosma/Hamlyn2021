@@ -6,7 +6,7 @@ from hamlyn2021.data_reader import get_dataloaders
 
 def test():
     # change this path to your data folder
-    data_dir = "/Users/joeranbosma/Hamlyn2021/data/"
+    data_dir = "/media/pelvis/projects/joeran/Data/hamlyn/"
 
     # example setup of PyTorch dataloader for random data
     batch_size = 32
