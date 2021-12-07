@@ -9,8 +9,8 @@ from hamlyn2021.data_reader import read_input_image, read_depth_map
 
 
 class CustomDatasetLoader(Dataset):
-    def __init__(self, input_dir: str, depth_dir: str, 
-                 input_files: List[str], depth_files: List[str], 
+    def __init__(self, input_dir: str, depth_dir: str,
+                 input_files: List[str], depth_files: List[str],
                  input_shape=(256, 512, 3), depth_shape=(256, 512)):
         self.input_dir = input_dir
         self.depth_dir = depth_dir
@@ -92,11 +92,11 @@ def get_dataloaders(
 ) -> DataLoader:
     """
     Setup DataLoader for training and validation
-    
+
     Inputs:
     :param input_dir: path to directory containing (tranformed) input images, e.g. /path/to/data/stylernd
     :param depth_dir: path to directory containing depth maps, e.g. /path/to/data/depth_random
-    :param train_folders: list of folders to include for training, default: ["3Dircadb1.1", "3Dircadb1.2", 
+    :param train_folders: list of folders to include for training, default: ["3Dircadb1.1", "3Dircadb1.2",
                           "3Dircadb1.8", "3Dircadb1.9", "3Dircadb1.10", "3Dircadb1.11"]
     :param train_folders: list of folders to include for validation, default: ["3Dircadb1.17", "3Dircadb1.18",
                           "3Dircadb1.19", "3Dircadb1.20"]
@@ -154,7 +154,7 @@ def test_get_dataloaders():
     input_dir = os.path.join(data_dir, "stylernd/")
     depth_dir = os.path.join(data_dir, "depth_random/")
     cases = ['00000']  # test using first case of each folder
-    
+
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
