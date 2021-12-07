@@ -1,17 +1,15 @@
 import os
 from tqdm import tqdm
+import argparse
 
 from hamlyn2021.data_reader import get_dataloaders
 
 
-def test():
-    # change this path to your data folder
-    data_dir = "/media/pelvis/projects/joeran/Data/hamlyn/"
-
+def test(data_dir):
     # example setup of PyTorch dataloader for random data
     batch_size = 32
     input_dir = os.path.join(data_dir, "stylernd/")
-    depth_dir = os.path.join(data_dir, "depth_random/")
+    depth_dir = os.path.join(data_dir, "simulated/")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
@@ -30,4 +28,9 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    # parse command line arguments
+    parser = argparse.ArgumentParser(description='Command line options')
+    parser.add_argument("--data", type=str, required=True, help="Path to data folder")
+    args = parser.parse_args()
+
+    test(data_dir=args.data)
