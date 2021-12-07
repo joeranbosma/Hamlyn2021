@@ -5,7 +5,9 @@ Module that implements functions to download
 the data from the website.
 """
 
+import os
 import wget
+from zipfile import ZipFile
 
 class Downloader:
     """
@@ -19,6 +21,16 @@ class Downloader:
         """
         wget.download(url, out=location)
 
+    def unzipFile(self, pathZip, pathOut=None):
+        """
+        Unzip files from downloaded pathZip to pathOut.
+        If pathOut is None, extracts to cwd.
+        :param pathZip: str, path to zip.
+        :param pathOut: str, path to save dir.
+        """
+        with ZipFile(pathZip, "r") as zipObj:
+            zipObj.extractall(pathOut)
+
 class RandomDownloader(Downloader):
     """
     Downloader child class that downloads the different datasets
@@ -30,6 +42,7 @@ class RandomDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/input_random_views.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "input_random_views.zip"))
 
     def downloadRandomTranslations(self, location=""):
         """
@@ -37,6 +50,7 @@ class RandomDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/translation_random_views.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "translation_random_views.zip"))
     
     def downloadRandomSegmentations(self, location=""):
         """
@@ -44,6 +58,7 @@ class RandomDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/segmentation_random_views.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "segmentation_random_views.zip"))
 
     def downloadRandomDepth(self, location=""):
         """
@@ -51,6 +66,7 @@ class RandomDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/depth_random_views.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "depth_random_views.zip"))
     
     def downloadRandomCoords(self, location=""):
         """
@@ -58,6 +74,7 @@ class RandomDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/3Dcoordinates_random_views.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "3Dcoordinates_random_views.zip"))
 
 class SequenceDownloader(Downloader):
     """
@@ -70,6 +87,7 @@ class SequenceDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/input_sequences.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "input_sequences.zip"))
 
     def downloadSequenceTranslations(self, location=""):
         """
@@ -77,6 +95,7 @@ class SequenceDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/translation_sequences.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "translation_sequences.zip"))
     
     def downloadSequenceSegmentations(self, location=""):
         """
@@ -84,6 +103,7 @@ class SequenceDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/segmentation_sequences.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "segmentation_sequences.zip"))
 
     def downloadSequenceDepth(self, location=""):
         """
@@ -91,6 +111,7 @@ class SequenceDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/depth_sequences.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "depth_sequences.zip"))
     
     def downloadSequenceCoords(self, location=""):
         """
@@ -98,4 +119,5 @@ class SequenceDownloader(Downloader):
         """
         url = "http://opencas.dkfz.de/video-sim2real/data/3Dcoordinates_sequences.zip"
         self.downloadFile(url, location)
+        self.unzipFile(os.path.join(location, "3Dcoordinates_sequences.zip"))
 
