@@ -54,9 +54,10 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     if cases is None:
         cases = [f"{i:04d}" for i in range(2000)]
     input_files = [
-        f"{folder}/[random_style]/img{case}.png"
+        f"{folder}/style_0{style_num}/img{case}.png"
         for case in cases
         for folder in folders
+        for style_num in range(5)
     ]
     depth_files = [
         f"{folder}/depths/depth{case}.exr"
