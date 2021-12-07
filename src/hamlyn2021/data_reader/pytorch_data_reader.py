@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Optional
 
-from hamlyn2021.data_reader.data_reader import read_input_image, read_depth_map
+from hamlyn2021.data_reader import read_input_image, read_depth_map
 
 
 class CustomDatasetLoader(Dataset):
@@ -177,4 +177,4 @@ def test_get_dataloaders():
 
 
 if __name__ == "__main__":
-    test()
+    test_get_dataloaders()
