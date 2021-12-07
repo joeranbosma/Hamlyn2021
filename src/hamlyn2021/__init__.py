@@ -9,7 +9,7 @@ def test(data_dir):
     # example setup of PyTorch dataloader for random data
     batch_size = 32
     input_dir = os.path.join(data_dir, "stylernd/")
-    depth_dir = os.path.join(data_dir, "depth_random/")
+    depth_dir = os.path.join(data_dir, "simulated/")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,

@@ -152,7 +152,7 @@ def test_get_dataloaders():
     # example setup of PyTorch dataloader for random data
     batch_size = 2
     input_dir = os.path.join(data_dir, "stylernd/")
-    depth_dir = os.path.join(data_dir, "depth_random/")
+    depth_dir = os.path.join(data_dir, "simulated/")
     cases = ['00000']  # test using first case of each folder
 
     train_dataloader, valid_dataloader = get_dataloaders(
