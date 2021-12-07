@@ -52,7 +52,7 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
     if cases is None:
-        cases = [f"{i:04d}" for i in range(2000)]
+        cases = [f"{i:05d}" for i in range(2000)]
     input_files = [
         f"{folder}/style_0[random_style]/img{case}.png"
         for case in cases
