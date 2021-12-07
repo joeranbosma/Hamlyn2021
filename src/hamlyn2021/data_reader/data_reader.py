@@ -13,6 +13,7 @@ def read_input_image(location: str, normalise: bool = True) -> np.ndarray:
     Returns:
     - input image, shape: (height, width, channels)
     """
+    assert os.path.exists(location), f"Input image not found at {location}!"
     img = cv2.imread(location)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -31,6 +32,7 @@ def read_depth_map(location: str, normalise=True) -> np.ndarray:
     Returns:
     - input image, shape: (height, width, channels)
     """
+    assert os.path.exists(location), f"Depth map not found at {location}!"
     # IMREAD_ANYDEPTH is needed because even though the data is stored in 8-bit channels
     # when it's read into memory it's represented at a higher bit depth
     lbl = cv2.imread(location, flags=cv2.IMREAD_ANYDEPTH)
@@ -111,9 +113,9 @@ def read_sequence(input_dir: str,
 
 if __name__ == "__main__":
     # show example sequence
-    print(os.listdir("."))
-    input_dir = "/Users/joeranbosma/Hamlyn2021/data/translation_sequences/sequences/scene_1/translation"
-    depth_dir = "/Users/joeranbosma/Hamlyn2021/data/depth_sequences/sequences/scene_1/depth"
+    data_dir = "/Users/joeranbosma/Hamlyn2021/data/"
+    input_dir = os.path.join(data_dir, "translation_sequences/sequences/scene_1/translation")
+    depth_dir = os.path.join(data_dir, "depth_sequences/sequences/scene_1/depth")
     images, labels = read_sequence(
         input_dir=input_dir,
         depth_dir=depth_dir,
@@ -128,3 +130,16 @@ if __name__ == "__main__":
         ax.imshow(lbl)
         plt.show()
         break  # prevent showing a popup for all timesteps
+
+    # show example random pair
+    input_path = os.path.join(data_dir, "input_random/3Dircadb1.1/inputs/img00000.png")
+    depth_path = os.path.join(data_dir, "depth_random/3Dircadb1.1/depths/depth00000.exr")
+    img = read_input_image(input_path)
+    lbl = read_depth_map(depth_path)
+
+    f, axes = plt.subplots(1, 2, figsize=(18, 8))
+    ax = axes[0]
+    ax.imshow(img)
+    ax = axes[1]
+    ax.imshow(lbl)
+    plt.show()
