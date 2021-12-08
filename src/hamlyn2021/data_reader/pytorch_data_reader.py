@@ -237,28 +237,39 @@ def get_dataloaders(
 def test_get_dataloaders():
     # parse command line arguments
     parser = argparse.ArgumentParser(description='Command line options')
-    parser.add_argument('--data_dir', type=str, required=True)
+    parser.add_argument("--path_data",
+                        "-d",
+                        help="Path to data for simulation",
+                        required=True,
+                        type=str)
+    parser.add_argument("--dataset_type",
+                        "-t",
+                        help="Dataset to use, 'random' or 'sequence'",
+                        required=False,
+                        default="random")
     args = parser.parse_args()
 
     # example setup of PyTorch dataloader for random data
-    dataset_type = "random"
-    if dataset_type == "sequence":
+    
+    if args.dataset_type == "sequence":
         input_dir = os.path.join(args.data_dir, "translation_sequences/sequences")
         depth_dir = os.path.join(args.data_dir, "depth_sequences/sequences")
-    elif dataset_type == "random":
+    elif args.dataset_type == "random":
         input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
         depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
+    else:
+        raise ValueError(f"Unrecognised dataset type: {args.dataset_type}")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
-        dataset_type=dataset_type,
+        dataset_type=args.dataset_type,
         batch_size=2,
     )
 
     for i, (images, labels) in enumerate(valid_dataloader):
         try:
-            if dataset_type == "sequence":
+            if args.dataset_type == "sequence":
                 # visualise first sample of the batch
                 img, lbl = images[0].numpy(), labels[0].numpy()
                 img = np.moveaxis(img, 0, -1)
@@ -274,7 +285,7 @@ def test_get_dataloaders():
                     f.tight_layout()
                     f.savefig(f"case-{i}.png")
                 plt.show()
-            elif dataset_type == "random":
+            elif args.dataset_type == "random":
                 # visualise first sample of the batch
                 img, lbl = images[0].numpy(), labels[0].numpy()
                 img = np.moveaxis(img, 0, -1)
@@ -284,7 +295,7 @@ def test_get_dataloaders():
                 ax.imshow(img)
                 ax = axes[1]
                 ax.imshow(lbl)
-                f.savefig(f"case-{i}.png")
+                # f.savefig(f"case-{i}.png")
                 plt.show()
         except Exception as e:
             print(f"Error: {e}")
