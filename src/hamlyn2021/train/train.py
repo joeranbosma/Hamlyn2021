@@ -45,8 +45,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
                                                              depth_dir=path_data_labels,
                                                              dataset_type=dataset_type,
-                                                             batch_size=batch_size,
-                                                             dataset_type=dataset_type)
+                                                             batch_size=batch_size)
 
     net = u.UNet()
     net = net.to(device)
