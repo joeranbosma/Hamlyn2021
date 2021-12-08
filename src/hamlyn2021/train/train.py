@@ -32,14 +32,21 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
     if wandb_un:
         wandb.init(project="Hamlyn2021", entity=wandb_un)
 
-    path_data_train = os.path.join(path_base, "translation_random_views/random_views/")
-    path_data_labels = os.path.join(path_base, "depth_random_views/random_views")
+    if args.dataset_type == "sequence":
+        path_data_train = os.path.join(path_base, "translation_sequences/sequences")
+        path_data_labels = os.path.join(path_base, "depth_sequences/sequences")
+    elif args.dataset_type == "random":
+        path_data_train = os.path.join(path_base, "translation_random_views/random_views")
+        path_data_labels = os.path.join(path_base, "depth_random_views/random_views")
+    else:
+        raise ValueError(f"Unrecognised dataset type: {args.dataset_type}")
 
 
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
                                                              depth_dir=path_data_labels,
                                                              dataset_type=dataset_type,
-                                                             batch_size=batch_size)
+                                                             batch_size=batch_size,
+                                                             dataset_type=dataset_type)
 
     net = u.UNet()
     net = net.to(device)
