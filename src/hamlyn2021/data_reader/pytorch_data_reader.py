@@ -8,6 +8,7 @@ import argparse
 from tqdm import tqdm
 
 from hamlyn2021.data_reader import read_input_image, read_depth_map
+from hamlyn2021.visualisation import show_sample
 
 
 def apply_mirroring(img, lbl):
@@ -249,14 +250,13 @@ def test_get_dataloaders():
                         default="random")
     args = parser.parse_args()
 
-    # example setup of PyTorch dataloader for random data
-    
+    # example setup of PyTorch dataloader
     if args.dataset_type == "sequence":
-        input_dir = os.path.join(args.data_dir, "translation_sequences/sequences")
-        depth_dir = os.path.join(args.data_dir, "depth_sequences/sequences")
+        input_dir = os.path.join(args.path_data, "translation_sequences/sequences")
+        depth_dir = os.path.join(args.path_data, "depth_sequences/sequences")
     elif args.dataset_type == "random":
-        input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
-        depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
+        input_dir = os.path.join(args.path_data, "translation_random_views/random_views")
+        depth_dir = os.path.join(args.path_data, "depth_random_views/random_views")
     else:
         raise ValueError(f"Unrecognised dataset type: {args.dataset_type}")
 
@@ -269,34 +269,8 @@ def test_get_dataloaders():
 
     for i, (images, labels) in enumerate(valid_dataloader):
         try:
-            if args.dataset_type == "sequence":
-                # visualise first sample of the batch
-                img, lbl = images[0].numpy(), labels[0].numpy()
-                img = np.moveaxis(img, 0, -1)
-                lbl = lbl[0]
-                f, axes2d = plt.subplots(img.shape[-1]//3, 2, figsize=(18, 8))
-                for i, axes in enumerate(axes2d):
-                    ax = axes[0]
-                    im = img[..., i * 3:(i+1) * 3]
-                    ax.imshow(im)
-                    ax.set_title(im.mean())
-                    ax = axes[1]
-                    ax.imshow(lbl)
-                    f.tight_layout()
-                    f.savefig(f"case-{i}.png")
-                plt.show()
-            elif args.dataset_type == "random":
-                # visualise first sample of the batch
-                img, lbl = images[0].numpy(), labels[0].numpy()
-                img = np.moveaxis(img, 0, -1)
-                lbl = lbl[0]
-                f, axes = plt.subplots(1, 2, figsize=(18, 8))
-                ax = axes[0]
-                ax.imshow(img)
-                ax = axes[1]
-                ax.imshow(lbl)
-                # f.savefig(f"case-{i}.png")
-                plt.show()
+            img, lbl = images[0].numpy(), labels[0].numpy()
+            show_sample(img, lbl, dataset_type=args.dataset_type)
         except Exception as e:
             print(f"Error: {e}")
 
