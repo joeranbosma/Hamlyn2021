@@ -34,10 +34,10 @@ def double_conv(in_channels, out_channels, padding=1):
 
 class UNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self, num_channels=3):
         super().__init__()
         
-        self.dconv_down1 = double_conv(3, 32)
+        self.dconv_down1 = double_conv(num_channels, 32)
         self.dconv_down2 = double_conv(32, 64)
         self.dconv_down3 = double_conv(64, 128)
         self.dconv_down4 = double_conv(128, 256)

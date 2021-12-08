@@ -22,7 +22,7 @@ import hamlyn2021.data_processing.data_scraping as ds
 
 
 def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
-               batch_size=32, epochs=10000, save_every=100):
+               batch_size=32, epochs=10000, save_every=100, num_channels=3):
     """
     Function to train a network using random views and depth views
     """
@@ -47,7 +47,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
                                                              dataset_type=dataset_type,
                                                              batch_size=batch_size)
 
-    net = u.UNet()
+    net = u.UNet(num_channels=num_channels)
     net = net.to(device)
     MSE_loss = nn.MSELoss()
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=1e-05, betas=(0.5, 0.999))
@@ -147,7 +147,13 @@ if __name__ == "__main__":
                         required=False,
                         type=int,
                         default=32)
+    parser.add_argument("--num_channels",
+                        "-nc",
+                        help="Number of input channels",
+                        required=False,
+                        type=int,
+                        default=3)
 
     args = parser.parse_args()
     train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type, 
-               batch_size=args.batch_size)
+               batch_size=args.batch_size, num_channels=args.num_channels)
