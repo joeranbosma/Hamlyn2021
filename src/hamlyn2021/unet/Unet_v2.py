@@ -1,12 +1,12 @@
-#!/usr/bin/env python
 # coding: utf-8
 
-# In[107]:
-
+"""
+Module to create a UNet
+"""
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F #contains some useful functions like activation functions & convolution operations you can use
+import torch.nn.functional as F
 import torchvision
 from torch.utils.data import Dataset, DataLoader
 from typing import Tuple
@@ -21,17 +21,6 @@ from tqdm import tqdm
 import os
 import time
 
-
-# In[101]:
-
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-
-
-# In[302]:
-
-
 # define U-net
 def double_conv(in_channels, out_channels, padding=1):
     return nn.Sequential(
@@ -42,10 +31,6 @@ def double_conv(in_channels, out_channels, padding=1):
         nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True)
     )
-
-
-# In[303]:
-
 
 class UNet(nn.Module):
 
@@ -126,64 +111,3 @@ class UNet(nn.Module):
         out = torch.sigmoid(deconv1)
         
         return out
-
-
-# In[304]:
-
-
-net = UNet()
-# net = net.to(device)
-MSE_loss = nn.MSELoss()
-optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=1e-05, betas=(0.5, 0.999))
-optimizer.zero_grad()
-
-
-# In[ ]:
-
-
-epochs=10
-all_error = np.zeros(0)
-
-for epoch in range(epochs):
-
-    ##########
-    # Train
-    ##########
-    t0 = time.time()
-    for i, (data, label) in enumerate(train_dataloader):
-        
-#         data = data.to(device)
-#         label= label.to(device)
-#         print(device,data.is_cuda,label.is_cuda)
-        # setting your network to train will ensure that parameters will be updated during training, 
-        # and that dropout will be used
-        net.train()
-        net.zero_grad()
-
-        batch_size = data.size()[0]
-        pred = net(data)
-        
-        # loss function here
-        err = MSE_loss(pred, label)
-        # -------------------------------------------------------------------------------------------------------------------
-
-        err.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-
-        time_elapsed = time.time() - t0
-        print('[{:d}/{:d}][{:d}/{:d}] Elapsed_time: {:.0f}m{:.0f}s Loss: {:.4f} MSE: {:.4f}'
-              .format(epoch, epochs, i, len(train_dataloader), time_elapsed // 60, time_elapsed % 60,
-                      err.item(), err))
-
-
-        error = err.item()
-
-        all_error = np.append(all_error, error)
-
-
-# In[ ]:
-
-
-
-
