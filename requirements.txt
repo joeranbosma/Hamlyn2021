@@ -7,3 +7,4 @@ matplotlib==3.5.0
 torch
 torchvision
 wget
+wandb
