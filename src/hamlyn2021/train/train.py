@@ -28,31 +28,8 @@ def train_func(path_base):
     device = "cuda:0"
 
 
-    path_data_train = os.path.join(path_base, "/translations_random_views")
-    path_data_labels = os.path.join(path_base, "/depth_random_views")
-
-    # Check if data exists, if not, download
-    if not os.path.exists(os.path.join(path_base, "translation_sequences")):
-        # make a download objects
-        obj_download = ds.SequenceDownloader()
-        obj_download.downloadSequenceTranslations(path_base)
-
-    # Check if data exists, if not, download
-    if not os.path.exists(os.path.join(path_base, "depth_sequences")):
-        # make a download objects
-        obj_download = ds.SequenceDownloader()
-        obj_download.downloadSequenceDepth(path_base)
-
-    if not os.path.exists(os.path.join(path_base, "translations_random_views")):
-        # make a download objects
-        obj_download = ds.RandomDownloader()
-        obj_download.downloadRandomTranslations(path_base)
-
-    # Check if data exists, if not, download
-    if not os.path.exists(os.path.join(path_base, "depth_random_views")):
-        # make a download objects
-        obj_download = ds.RandomDownloader()
-        obj_download.downloadRandomDepth(path_base)
+    path_data_train = os.path.join(path_base, "/translation_random_views/random_views/")
+    path_data_labels = os.path.join(path_base, "/depth_random_views/random_views")
 
 
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
