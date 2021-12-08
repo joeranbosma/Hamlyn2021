@@ -4,6 +4,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Optional
+import argparse
+from tqdm import tqdm
 
 from hamlyn2021.data_reader import read_input_image, read_depth_map
 
@@ -141,22 +143,18 @@ def get_dataloaders(
 
 
 def test_get_dataloaders():
-    data_dir = "/Users/joeranbosma/Hamlyn2021/data/"
+    # parse command line arguments
+    parser = argparse.ArgumentParser(description='Command line options')
+    parser.add_argument('--data_dir', type=str, required=True)
+    args = parser.parse_args()
 
     # example setup of PyTorch dataloader for random data
-    batch_size = 2
-    input_dir = os.path.join(data_dir, "stylernd/")
-    depth_dir = os.path.join(data_dir, "simulated/")
-    cases = ['0000']  # test using first case of each folder
+    input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
+    depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
-        train_folders=['scene_1'],
-        valid_folders=['scene_7'],
-        train_cases=cases,
-        valid_cases=cases,
-        batch_size=batch_size,
     )
 
     for images, labels in valid_dataloader:
@@ -168,6 +166,12 @@ def test_get_dataloaders():
         ax = axes[1]
         ax.imshow(lbl)
         plt.show()
+        break
+
+    for images, labels in tqdm(train_dataloader):
+        pass
+    for images, labels in tqdm(valid_dataloader):
+        pass
 
 
 if __name__ == "__main__":
