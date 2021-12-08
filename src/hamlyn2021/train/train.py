@@ -38,6 +38,9 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
     elif dataset_type == "random":
         path_data_train = os.path.join(path_base, "translation_random_views/random_views")
         path_data_labels = os.path.join(path_base, "depth_random_views/random_views")
+    elif args.dataset_type == "random_old":
+        path_data_train = os.path.join(path_base, "stylernd")
+        path_data_labels = os.path.join(path_base, "depths/simulated")
     else:
         raise ValueError(f"Unrecognised dataset type: {dataset_type}")
 
@@ -153,7 +156,13 @@ if __name__ == "__main__":
                         required=False,
                         type=int,
                         default=3)
+    parser.add_argument("--save_every",
+                        "-se",
+                        help="Frequency to store model",
+                        required=False,
+                        type=int,
+                        default=100)
 
     args = parser.parse_args()
     train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type, 
-               batch_size=args.batch_size, num_channels=args.num_channels)
+               batch_size=args.batch_size, num_channels=args.num_channels, save_every=args.save_every)
