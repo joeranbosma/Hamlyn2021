@@ -21,15 +21,18 @@ import hamlyn2021.unet.Unet_v2 as u
 import hamlyn2021.data_reader.pytorch_data_reader as pdr
 import hamlyn2021.data_processing.data_scraping as ds
 
-def train_func(path_base):
+def train_func(path_base, device=None, wandb_un=None):
     """
     Function to train a network using random views and depth views
     """
-    device = "cuda:0"
+    if device is None:
+        device = "cuda:0"
 
+    if wandb_un:
+        wandb.init(project="Hamlyn2021", entity=wandb_un)
 
-    path_data_train = os.path.join(path_base, "/translation_random_views/random_views/")
-    path_data_labels = os.path.join(path_base, "/depth_random_views/random_views")
+    path_data_train = os.path.join(path_base, "translation_random_views/random_views/")
+    path_data_labels = os.path.join(path_base, "depth_random_views/random_views")
 
 
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
@@ -58,10 +61,10 @@ def train_func(path_base):
             net.zero_grad()
 
             batch_size = data.size()[0]
-            pred = net(data)
+            pred = net(data.to(device).float())
 
             # loss function here
-            err = MSE_loss(pred, label)
+            err = MSE_loss(pred, label.to(device).float())
             # -------------------------------------------------------------------------------------------------------------------
 
             err.backward()
@@ -73,20 +76,19 @@ def train_func(path_base):
                 .format(epoch, epochs, i, len(train_data_loader), time_elapsed // 60, time_elapsed % 60,
                         err.item(), err))
 
-            error = err.item()
+            error = err.detach().cpu().item()
 
             all_error = np.append(all_error, error)
 
         for i, (data, label) in enumerate(val_data_loader):
-            
-            net.evaluate()
+            net.eval()
             net.zero_grad()
 
             batch_size = data.size()[0]
-            pred = net(data)
+            pred = net(data.to(device).float())
 
             # loss function here
-            err = MSE_loss(pred, label)
+            err = MSE_loss(pred, label.to(device).float())
             # -------------------------------------------------------------------------------------------------------------------
 
             time_elapsed = time.time() - t0
@@ -94,15 +96,18 @@ def train_func(path_base):
                 .format(epoch, epochs, i, len(train_data_loader), time_elapsed // 60, time_elapsed % 60,
                         err.item(), err))
 
-            val_error = err.item()
+            val_error = err.detach().cpu().item()
 
-            all_error = np.append(all_val_error, error)
+            all_val_error = np.append(all_val_error, val_error)
 
         if epoch % 100:
             torch.save(net.state_dict(), os.path.join(path_base, "state_dict_model_unet_{}.pt".format(str(time_elapsed))))
 
+    if wandb_un:
+        wandb.log({"train_loss": all_error, "val_loss":all_val_error})
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='train_12dof')
+    parser = argparse.ArgumentParser(description='HamlynUNet')
 
     ## ARGS
     parser.add_argument("--path_data",
@@ -111,6 +116,19 @@ if __name__ == "__main__":
                         required=True,
                         type=str,
                         default=None)
+    parser.add_argument("--device",
+                        "-c",
+                        help="Device to use, defaults to cuda:0",
+                        required=False,
+                        type=str,
+                        default=None)
+
+    parser.add_argument("--wandb_un",
+                        "-w",
+                        help="Name of username for wandb log",
+                        required=False,
+                        type=str,
+                        default=None)
 
     args = parser.parse_args()
-    train_func(args.path_data)
+    train_func(args.path_data, args.device, args.wandb_un)
