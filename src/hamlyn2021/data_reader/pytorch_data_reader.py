@@ -13,7 +13,7 @@ from hamlyn2021.data_reader import read_input_image, read_depth_map
 class CustomDatasetLoader(Dataset):
     def __init__(self, input_dir: str, depth_dir: str,
                  input_files: List[str], depth_files: List[str],
-                 input_shape=(256, 512, 3), depth_shape=(256, 512)):
+                 input_shape=(3, 256, 512), depth_shape=(1, 256, 512)):
         self.input_dir = input_dir
         self.depth_dir = depth_dir
         self.input_files = input_files
@@ -46,6 +46,9 @@ class CustomDatasetLoaderRandom(CustomDatasetLoader):
 
         img = read_input_image(input_path)
         lbl = read_depth_map(depth_path)
+
+        img = np.moveaxis(img, -1, 0)
+        lbl = lbl[None,]
 
         return img, lbl
 
