@@ -53,6 +53,27 @@ class CustomDatasetLoaderRandom(CustomDatasetLoader):
         return img, lbl
 
 
+class CustomDatasetLoaderSequence(CustomDatasetLoader):
+    def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate a single pair of input image and target depth map"""
+        input_files = self.input_files[idx]
+        depth_fn = self.depth_files[idx]
+
+        depth_path = os.path.join(self.depth_dir, depth_fn)
+        lbl = read_depth_map(depth_path)
+        lbl = lbl[None,]
+
+        images = []
+        for fn in input_files:
+            input_path = os.path.join(self.input_dir, fn)
+            img = read_input_image(input_path)
+            img = np.moveaxis(img, -1, 0)
+            images += [img]
+        images = np.concatenate(images, axis=0)
+
+        return images, lbl
+
+
 def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, shuffle=True) -> DataLoader:
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
@@ -86,6 +107,44 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     return dataloader
 
 
+def setup_sequence_dataloader(input_dir, depth_dir, folders, cases=None, preceding_frames=None, batch_size=32, shuffle=True) -> DataLoader:
+    """Setup DataLoader for specified folders and cases"""
+    # colect filenames for input images and output depth maps
+    if preceding_frames is None:
+        preceding_frames = 3
+    if cases is None:
+        cases = [f"{i:04d}" for i in range(preceding_frames, 100)]
+    input_files = [
+        [
+            f"{folder}/translation/translation{int(case)-delta:04d}.png"
+            for delta in range(preceding_frames+1)
+        ]
+        for case in cases
+        for folder in folders
+    ]
+    depth_files = [
+        f"{folder}/depth/depth{case}.exr"
+        for case in cases
+        for folder in folders
+    ]
+
+    # set up dataloader
+    data_generator = CustomDatasetLoaderSequence(
+        input_dir=input_dir,
+        depth_dir=depth_dir,
+        input_files=input_files,
+        depth_files=depth_files
+    )
+    dataloader = DataLoader(
+        data_generator,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=min(batch_size, 8)
+    )
+
+    return dataloader
+
+
 def get_dataloaders(
     input_dir: str,
     depth_dir: str,
@@ -93,7 +152,8 @@ def get_dataloaders(
     valid_folders: Optional[List[str]] = None,
     train_cases: Optional[List[str]] = None,
     valid_cases: Optional[List[str]] = None,
-    batch_size: int = 32
+    batch_size: int = 32,
+    dataset_type: str = "random"
 ) -> DataLoader:
     """
     Setup DataLoader for training and validation
@@ -125,7 +185,12 @@ def get_dataloaders(
             for i in (5, 6)
         ]
 
-    train_dataloader = setup_dataloader(
+    if dataset_type == "random":
+        dataloader_constructor = setup_dataloader
+    elif dataset_type == "sequence":
+        dataloader_constructor = setup_sequence_dataloader
+
+    train_dataloader = dataloader_constructor(
         input_dir=input_dir,
         depth_dir=depth_dir,
         folders=train_folders,
@@ -133,7 +198,7 @@ def get_dataloaders(
         batch_size=batch_size,
         shuffle=True
     )
-    valid_dataloader = setup_dataloader(
+    valid_dataloader = dataloader_constructor(
         input_dir=input_dir,
         depth_dir=depth_dir,
         folders=valid_folders,
@@ -158,18 +223,22 @@ def test_get_dataloaders():
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
+        dataset_type="sequence",
     )
 
     for images, labels in valid_dataloader:
-        # visualise first sample of the batch
-        img, lbl = images[0].numpy(), labels[0].numpy()
-        f, axes = plt.subplots(1, 2, figsize=(18, 8))
-        ax = axes[0]
-        ax.imshow(img)
-        ax = axes[1]
-        ax.imshow(lbl)
-        plt.show()
-        break
+        try:
+            # visualise first sample of the batch
+            img, lbl = images[0].numpy(), labels[0].numpy()
+            f, axes = plt.subplots(1, 2, figsize=(18, 8))
+            ax = axes[0]
+            ax.imshow(img)
+            ax = axes[1]
+            ax.imshow(lbl)
+            plt.show()
+            break
+        except Exception as e:
+            print(f"Error: {e}")
 
     for images, labels in tqdm(train_dataloader):
         pass
