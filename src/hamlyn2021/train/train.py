@@ -21,7 +21,7 @@ import hamlyn2021.unet.Unet_v2 as u
 import hamlyn2021.data_reader.pytorch_data_reader as pdr
 import hamlyn2021.data_processing.data_scraping as ds
 
-def train_func(path_base, device=None, wandb_un=None):
+def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
     """
     Function to train a network using random views and depth views
     """
@@ -36,7 +36,8 @@ def train_func(path_base, device=None, wandb_un=None):
 
 
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
-                                                            depth_dir=path_data_labels)
+                                                             depth_dir=path_data_labels,
+                                                             dataset_type=dataset_type)
 
     net = u.UNet()
     net = net.to(device)
@@ -129,6 +130,11 @@ if __name__ == "__main__":
                         required=False,
                         type=str,
                         default=None)
+    parser.add_argument("--dataset_type",
+                        "-t",
+                        help="Dataset to use, 'random' or 'sequence'",
+                        required=False,
+                        default="random")
 
     args = parser.parse_args()
-    train_func(args.path_data, args.device, args.wandb_un)
+    train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type)
