@@ -25,7 +25,7 @@ def show_sample(img, lbl, dataset_type="random"):
             ax.imshow(im)
             ax = axes[1]
             ax.imshow(lbl)
-    elif dataset_type == "random":
+    elif dataset_type == "random" or dataset_type == "random_old":
         f, axes = plt.subplots(1, 2, figsize=(18, 8))
         ax = axes[0]
         ax.imshow(img)

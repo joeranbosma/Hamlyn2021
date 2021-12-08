@@ -99,18 +99,24 @@ class CustomDatasetLoaderSequence(CustomDatasetLoader):
         return images, lbl
 
 
-def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, shuffle=True) -> DataLoader:
+def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, shuffle=True, dataset_type="random") -> DataLoader:
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
     if cases is None:
-        cases = [f"{i:04d}" for i in range(3000)]
+        if dataset_type == "random_old":
+            cases = [f"{i:05d}" for i in range(2000)]
+        elif dataset_type == "random":
+            cases = [f"{i:04d}" for i in range(3000)]
+
+    folders_and_prefix = "translation/translation" if dataset_type == "random" else "style_0[random_style]/img"
     input_files = [
-        f"{folder}/translation/translation{case}.png"
+        f"{folder}/{folders_and_prefix}{case}.png"
         for case in cases
         for folder in folders
     ]
+    folders_and_prefix = "depth/depth" if dataset_type == "random" else "depths/depth"
     depth_files = [
-        f"{folder}/depth/depth{case}.exr"
+        f"{folder}/{folders_and_prefix}{case}.exr"
         for case in cases
         for folder in folders
     ]
@@ -132,7 +138,8 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     return dataloader
 
 
-def setup_sequence_dataloader(input_dir, depth_dir, folders, cases=None, preceding_frames=None, batch_size=32, shuffle=True) -> DataLoader:
+def setup_sequence_dataloader(input_dir, depth_dir, folders, cases=None, preceding_frames=None, 
+                              batch_size=32, shuffle=True, dataset_type="sequence") -> DataLoader:
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
     if preceding_frames is None:
@@ -200,17 +207,38 @@ def get_dataloaders(
     """
     # colect filenames for input images and output depth maps
     if train_folders is None:
-        train_folders = [
-            f"scene_{i}"
-            for i in (1, 2, 3, 4)
-        ]
+        if dataset_type == "sequence" or dataset_type == "random":
+            train_folders = [
+                f"scene_{i}"
+                for i in (1, 2, 3, 4)
+            ]
+        elif dataset_type == "random_old":
+            train_folders = [
+                "3Dircadb1.1",
+                "3Dircadb1.2",
+                "3Dircadb1.8",
+                "3Dircadb1.9",
+                "3Dircadb1.10",
+                "3Dircadb1.11",
+            ]
+        else:
+            raise ValueError(f"Unknown dataset type: {dataset_type}")
     if valid_folders is None:
-        valid_folders = [
-            f"scene_{i}"
-            for i in (5, 6)
-        ]
+        if dataset_type == "sequence" or dataset_type == "random":
+            valid_folders = [
+                f"scene_{i}"
+                for i in (5, 6)
+            ]
+        elif dataset_type == "random_old":
+            valid_folders = [
+                "3Dircadb1.17",
+                "3Dircadb1.18",
+                "3Dircadb1.19",
+            ]
+        else:
+            raise ValueError(f"Unknown dataset type: {dataset_type}")
 
-    if dataset_type == "random":
+    if dataset_type == "random" or dataset_type == "random_old":
         dataloader_constructor = setup_dataloader
     elif dataset_type == "sequence":
         dataloader_constructor = setup_sequence_dataloader
@@ -221,6 +249,7 @@ def get_dataloaders(
         folders=train_folders,
         cases=train_cases,
         batch_size=batch_size,
+        dataset_type=dataset_type,
         shuffle=True
     )
     valid_dataloader = dataloader_constructor(
@@ -229,6 +258,7 @@ def get_dataloaders(
         folders=valid_folders,
         cases=valid_cases,
         batch_size=batch_size,
+        dataset_type=dataset_type,
         shuffle=False
     )
 
@@ -257,6 +287,9 @@ def test_get_dataloaders():
     elif args.dataset_type == "random":
         input_dir = os.path.join(args.path_data, "translation_random_views/random_views")
         depth_dir = os.path.join(args.path_data, "depth_random_views/random_views")
+    elif args.dataset_type == "random_old":
+        input_dir = os.path.join(args.path_data, "stylernd")
+        depth_dir = os.path.join(args.path_data, "depths/simulated")
     else:
         raise ValueError(f"Unrecognised dataset type: {args.dataset_type}")
 
