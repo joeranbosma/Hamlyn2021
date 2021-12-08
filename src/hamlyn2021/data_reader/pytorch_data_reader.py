@@ -112,12 +112,12 @@ def get_dataloaders(
     if train_folders is None:
         train_folders = [
             f"scene_{i}"
-            for i in (1, 2, 3, 4, 5)
+            for i in (1, 2, 3, 4)
         ]
     if valid_folders is None:
         valid_folders = [
             f"scene_{i}"
-            for i in (6, 7)
+            for i in (5, 6)
         ]
 
     train_dataloader = setup_dataloader(
