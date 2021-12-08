@@ -38,7 +38,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
     elif dataset_type == "random":
         path_data_train = os.path.join(path_base, "translation_random_views/random_views")
         path_data_labels = os.path.join(path_base, "depth_random_views/random_views")
-    elif args.dataset_type == "random_old":
+    elif dataset_type == "random_old":
         path_data_train = os.path.join(path_base, "stylernd")
         path_data_labels = os.path.join(path_base, "depths/simulated")
     else:
