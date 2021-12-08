@@ -16,12 +16,13 @@ import torch.nn.functional as F
 import torchvision
 from torch.utils.data import Dataset, DataLoader
 
-
 import hamlyn2021.unet.Unet_v2 as u
 import hamlyn2021.data_reader.pytorch_data_reader as pdr
 import hamlyn2021.data_processing.data_scraping as ds
 
-def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
+
+def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
+               batch_size=32, epochs=10000, save_every=100):
     """
     Function to train a network using random views and depth views
     """
@@ -37,7 +38,8 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
 
     train_data_loader, val_data_loader = pdr.get_dataloaders(input_dir=path_data_train,
                                                              depth_dir=path_data_labels,
-                                                             dataset_type=dataset_type)
+                                                             dataset_type=dataset_type,
+                                                             batch_size=batch_size)
 
     net = u.UNet()
     net = net.to(device)
@@ -46,7 +48,6 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
     optimizer.zero_grad()
     all_error = np.zeros(0)
     all_val_error = np.zeros(0)
-    epochs=10000
 
     for epoch in range(epochs):
 
@@ -61,7 +62,6 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
             net.train()
             net.zero_grad()
 
-            batch_size = data.size()[0]
             pred = net(data.to(device).float())
 
             # loss function here
@@ -85,7 +85,6 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
             net.eval()
             net.zero_grad()
 
-            batch_size = data.size()[0]
             pred = net(data.to(device).float())
 
             # loss function here
@@ -105,7 +104,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random"):
             torch.save(net.state_dict(), os.path.join(path_base, "state_dict_model_unet_{}.pt".format(str(time_elapsed))))
 
         if wandb_un:
-            wandb.log({"train_loss": all_error, "val_loss":all_val_error})
+            wandb.log({"train_loss": all_error, "val_loss": all_val_error})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='HamlynUNet')
@@ -134,7 +133,15 @@ if __name__ == "__main__":
                         "-t",
                         help="Dataset to use, 'random' or 'sequence'",
                         required=False,
+                        type=str,
                         default="random")
+    parser.add_argument("--batch_size",
+                        "-bs",
+                        help="Batch size",
+                        required=False,
+                        type=int,
+                        default=32)
 
     args = parser.parse_args()
-    train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type)
+    train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type, 
+               batch_size=args.batch_size)
