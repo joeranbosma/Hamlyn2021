@@ -100,7 +100,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
 
             all_val_error = np.append(all_val_error, val_error)
 
-        if epoch % 100:
+        if epoch % save_every:
             torch.save(net.state_dict(), os.path.join(path_base, "state_dict_model_unet_{}.pt".format(str(time_elapsed))))
 
         if wandb_un:
