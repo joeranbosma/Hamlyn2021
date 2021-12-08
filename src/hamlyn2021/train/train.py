@@ -113,7 +113,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
             torch.save(net.state_dict(), os.path.join(path_base, "state_dict_model_unet_{}.pt".format(str(epoch))))
 
         if wandb_un:
-            wandb.log({"train_loss": all_error, "val_loss": all_val_error})
+            wandb.log({"train_loss": np.mean(all_error), "val_loss": np.mean(all_val_error)})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='HamlynUNet')
