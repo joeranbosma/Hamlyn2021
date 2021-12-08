@@ -52,14 +52,14 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
     if cases is None:
-        cases = [f"{i:05d}" for i in range(2000)]
+        cases = [f"{i:04d}" for i in range(3000)]
     input_files = [
-        f"{folder}/style_0[random_style]/img{case}.png"
+        f"{folder}/translation/translation{case}.png"
         for case in cases
         for folder in folders
     ]
     depth_files = [
-        f"{folder}/depths/depth{case}.exr"
+        f"{folder}/depth/depth{case}.exr"
         for case in cases
         for folder in folders
     ]
@@ -111,19 +111,13 @@ def get_dataloaders(
     # colect filenames for input images and output depth maps
     if train_folders is None:
         train_folders = [
-            "3Dircadb1.1",
-            "3Dircadb1.2",
-            "3Dircadb1.8",
-            "3Dircadb1.9",
-            "3Dircadb1.10",
-            "3Dircadb1.11",
+            f"scene_{i}"
+            for i in (1, 2, 3, 4, 5)
         ]
     if valid_folders is None:
         valid_folders = [
-            "3Dircadb1.17",
-            "3Dircadb1.18",
-            "3Dircadb1.19",
-            "3Dircadb1.20",
+            f"scene_{i}"
+            for i in (6, 7)
         ]
 
     train_dataloader = setup_dataloader(
@@ -153,13 +147,13 @@ def test_get_dataloaders():
     batch_size = 2
     input_dir = os.path.join(data_dir, "stylernd/")
     depth_dir = os.path.join(data_dir, "simulated/")
-    cases = ['00000']  # test using first case of each folder
+    cases = ['0000']  # test using first case of each folder
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
-        train_folders=['3Dircadb1.1'],
-        valid_folders=['3Dircadb1.1'],
+        train_folders=['scene_1'],
+        valid_folders=['scene_7'],
         train_cases=cases,
         valid_cases=cases,
         batch_size=batch_size,
