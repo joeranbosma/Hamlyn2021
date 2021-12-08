@@ -10,16 +10,32 @@ from tqdm import tqdm
 from hamlyn2021.data_reader import read_input_image, read_depth_map
 
 
+def apply_mirroring(img, lbl):
+    if np.random.uniform() > 0.5:
+        # horizontal flip
+        img = np.flip(img, axis=-1).copy()
+        lbl = np.flip(lbl, axis=-1).copy()
+
+    if np.random.uniform() > 0.5:
+        # vertical flip
+        img = np.flip(img, axis=-2).copy()
+        lbl = np.flip(lbl, axis=-2).copy()
+
+    return img, lbl
+
+
 class CustomDatasetLoader(Dataset):
     def __init__(self, input_dir: str, depth_dir: str,
                  input_files: List[str], depth_files: List[str],
-                 input_shape=(3, 256, 512), depth_shape=(1, 256, 512)):
+                 input_shape=(3, 256, 512), depth_shape=(1, 256, 512),
+                 augments=True):
         self.input_dir = input_dir
         self.depth_dir = depth_dir
         self.input_files = input_files
         self.depth_files = depth_files
         self.input_shape = input_shape
         self.depth_shape = depth_shape
+        self.augments    = augments
 
     def __len__(self) -> int:
         return len(self.input_files)
@@ -50,6 +66,10 @@ class CustomDatasetLoaderRandom(CustomDatasetLoader):
         img = np.moveaxis(img, -1, 0)
         lbl = lbl[None,]
 
+        if self.augments is True:
+            # randomly flip images and labels (horizontal and vertical)
+            img, lbl = apply_mirroring(img, lbl)
+
         return img, lbl
 
 
@@ -70,6 +90,10 @@ class CustomDatasetLoaderSequence(CustomDatasetLoader):
             img = np.moveaxis(img, -1, 0)
             images += [img]
         images = np.concatenate(images, axis=0)
+
+        if self.augments is True:
+            # randomly flip images and labels (horizontal and vertical)
+            images, lbl = apply_mirroring(images, lbl)
 
         return images, lbl
 
@@ -217,33 +241,61 @@ def test_get_dataloaders():
     args = parser.parse_args()
 
     # example setup of PyTorch dataloader for random data
-    input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
-    depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
+    dataset_type = "random"
+    if dataset_type == "sequence":
+        input_dir = os.path.join(args.data_dir, "translation_sequences/sequences")
+        depth_dir = os.path.join(args.data_dir, "depth_sequences/sequences")
+    elif dataset_type == "random":
+        input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
+        depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
-        dataset_type="sequence",
+        dataset_type=dataset_type,
+        batch_size=2,
     )
 
-    for images, labels in valid_dataloader:
+    for i, (images, labels) in enumerate(valid_dataloader):
         try:
-            # visualise first sample of the batch
-            img, lbl = images[0].numpy(), labels[0].numpy()
-            f, axes = plt.subplots(1, 2, figsize=(18, 8))
-            ax = axes[0]
-            ax.imshow(img)
-            ax = axes[1]
-            ax.imshow(lbl)
-            plt.show()
-            break
+            if dataset_type == "sequence":
+                # visualise first sample of the batch
+                img, lbl = images[0].numpy(), labels[0].numpy()
+                img = np.moveaxis(img, 0, -1)
+                lbl = lbl[0]
+                f, axes2d = plt.subplots(img.shape[-1]//3, 2, figsize=(18, 8))
+                for i, axes in enumerate(axes2d):
+                    ax = axes[0]
+                    im = img[..., i * 3:(i+1) * 3]
+                    ax.imshow(im)
+                    ax.set_title(im.mean())
+                    ax = axes[1]
+                    ax.imshow(lbl)
+                    f.tight_layout()
+                    f.savefig(f"case-{i}.png")
+                plt.show()
+            elif dataset_type == "random":
+                # visualise first sample of the batch
+                img, lbl = images[0].numpy(), labels[0].numpy()
+                img = np.moveaxis(img, 0, -1)
+                lbl = lbl[0]
+                f, axes = plt.subplots(1, 2, figsize=(18, 8))
+                ax = axes[0]
+                ax.imshow(img)
+                ax = axes[1]
+                ax.imshow(lbl)
+                f.savefig(f"case-{i}.png")
+                plt.show()
         except Exception as e:
             print(f"Error: {e}")
 
-    for images, labels in tqdm(train_dataloader):
-        pass
-    for images, labels in tqdm(valid_dataloader):
-        pass
+        if i > 3:
+            break
+
+    # for images, labels in tqdm(train_dataloader):
+    #     pass
+    # for images, labels in tqdm(valid_dataloader):
+    #     pass
 
 
 if __name__ == "__main__":
