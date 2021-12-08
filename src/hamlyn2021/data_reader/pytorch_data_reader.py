@@ -4,6 +4,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Optional
+import argparse
+from tqdm import tqdm
 
 from hamlyn2021.data_reader import read_input_image, read_depth_map
 
@@ -52,14 +54,14 @@ def setup_dataloader(input_dir, depth_dir, folders, cases=None, batch_size=32, s
     """Setup DataLoader for specified folders and cases"""
     # colect filenames for input images and output depth maps
     if cases is None:
-        cases = [f"{i:05d}" for i in range(2000)]
+        cases = [f"{i:04d}" for i in range(3000)]
     input_files = [
-        f"{folder}/style_0[random_style]/img{case}.png"
+        f"{folder}/translation/translation{case}.png"
         for case in cases
         for folder in folders
     ]
     depth_files = [
-        f"{folder}/depths/depth{case}.exr"
+        f"{folder}/depth/depth{case}.exr"
         for case in cases
         for folder in folders
     ]
@@ -111,19 +113,13 @@ def get_dataloaders(
     # colect filenames for input images and output depth maps
     if train_folders is None:
         train_folders = [
-            "3Dircadb1.1",
-            "3Dircadb1.2",
-            "3Dircadb1.8",
-            "3Dircadb1.9",
-            "3Dircadb1.10",
-            "3Dircadb1.11",
+            f"scene_{i}"
+            for i in (1, 2, 3, 4)
         ]
     if valid_folders is None:
         valid_folders = [
-            "3Dircadb1.17",
-            "3Dircadb1.18",
-            "3Dircadb1.19",
-            "3Dircadb1.20",
+            f"scene_{i}"
+            for i in (5, 6)
         ]
 
     train_dataloader = setup_dataloader(
@@ -147,22 +143,18 @@ def get_dataloaders(
 
 
 def test_get_dataloaders():
-    data_dir = "/Users/joeranbosma/Hamlyn2021/data/"
+    # parse command line arguments
+    parser = argparse.ArgumentParser(description='Command line options')
+    parser.add_argument('--data_dir', type=str, required=True)
+    args = parser.parse_args()
 
     # example setup of PyTorch dataloader for random data
-    batch_size = 2
-    input_dir = os.path.join(data_dir, "stylernd/")
-    depth_dir = os.path.join(data_dir, "simulated/")
-    cases = ['00000']  # test using first case of each folder
+    input_dir = os.path.join(args.data_dir, "translation_random_views/random_views")
+    depth_dir = os.path.join(args.data_dir, "depth_random_views/random_views")
 
     train_dataloader, valid_dataloader = get_dataloaders(
         input_dir=input_dir,
         depth_dir=depth_dir,
-        train_folders=['3Dircadb1.1'],
-        valid_folders=['3Dircadb1.1'],
-        train_cases=cases,
-        valid_cases=cases,
-        batch_size=batch_size,
     )
 
     for images, labels in valid_dataloader:
@@ -174,6 +166,12 @@ def test_get_dataloaders():
         ax = axes[1]
         ax.imshow(lbl)
         plt.show()
+        break
+
+    for images, labels in tqdm(train_dataloader):
+        pass
+    for images, labels in tqdm(valid_dataloader):
+        pass
 
 
 if __name__ == "__main__":

@@ -39,7 +39,8 @@ def read_depth_map(location: str, normalise=True) -> np.ndarray:
 
     if normalise:
         # normalise depth map
-        lbl = lbl / 256.
+        lbl = lbl / 300  # <- this scales the vast majority of pixels to [0, 1]
+        lbl = np.clip(lbl, a_min=0, a_max=1)  # <- clip the remaining pixels to [0, 1]
 
     return lbl
 
