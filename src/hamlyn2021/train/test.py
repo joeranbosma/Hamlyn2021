@@ -47,9 +47,10 @@ def test_func(path_base, path_model, device=None, dataset_type="random",
         print(label.shape)
         pred = net(data.to(device).float())
         # Plot
-        fig, axes = plt.subplots(1, 2) 
+        fig, axes = plt.subplots(1, 3) 
         axes[0].imshow(np.transpose(data[0, 0:3, :, :].cpu().numpy(), (1, 2, 0)))
         axes[1].imshow(label[0, 0, :, :].cpu().numpy())
+        axes[2].imshow(pred[0, 0, :, :].detach().cpu().numpy())
         plt.savefig(os.path.join(path_base,"Test_depths_{}.png".format(i)))
 
 if __name__ == "__main__":
