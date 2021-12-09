@@ -23,7 +23,7 @@ import hamlyn2021.data_processing.data_scraping as ds
 
 def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
                batch_size=32, epochs=10000, save_every=100, num_channels=3,
-               preceding_frames=None):
+               preceding_frames=None, learning_rate=1e-5):
     """
     Function to train a network using random views and depth views
     """
@@ -55,7 +55,7 @@ def train_func(path_base, device=None, wandb_un=None, dataset_type="random",
     net = u.UNet(num_channels=num_channels)
     net = net.to(device)
     MSE_loss = nn.MSELoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=1e-05, betas=(0.5, 0.999))
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate, betas=(0.5, 0.999))
     optimizer.zero_grad()
     all_error = np.zeros(0)
     all_val_error = np.zeros(0)
@@ -170,9 +170,15 @@ if __name__ == "__main__":
                         required=False,
                         type=int,
                         default=3)
+    parser.add_argument("--learning_rate",
+                        "-lr",
+                        help="Learning rate",
+                        required=False,
+                        type=float,
+                        default=1e-5)
 
     args = parser.parse_args()
     print(f"Training from arguments: \n{args}")
     train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type, 
                batch_size=args.batch_size, num_channels=args.num_channels, save_every=args.save_every,
-               preceding_frames=args.preceding_frames)
+               preceding_frames=args.preceding_frames, learning_rate=args.learning_rate)
