@@ -250,7 +250,7 @@ def get_dataloaders(
         dataloader_constructor = setup_dataloader
     elif dataset_type == "sequence":
         dataloader_constructor = setup_sequence_dataloader
-        kwargs['preceding_frames'] = preceding_frames,
+        kwargs['preceding_frames'] = preceding_frames
 
     train_dataloader = dataloader_constructor(
         folders=train_folders,

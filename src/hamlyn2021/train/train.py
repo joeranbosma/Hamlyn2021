@@ -172,6 +172,7 @@ if __name__ == "__main__":
                         default=3)
 
     args = parser.parse_args()
+    print(f"Training from arguments: \n{args}")
     train_func(args.path_data, args.device, args.wandb_un, dataset_type=args.dataset_type, 
                batch_size=args.batch_size, num_channels=args.num_channels, save_every=args.save_every,
                preceding_frames=args.preceding_frames)
