@@ -185,7 +185,8 @@ def get_dataloaders(
     train_cases: Optional[List[str]] = None,
     valid_cases: Optional[List[str]] = None,
     batch_size: int = 32,
-    dataset_type: str = "random"
+    dataset_type: str = "random",
+    preceding_frames: Optional[int] = None,
 ) -> DataLoader:
     """
     Setup DataLoader for training and validation
@@ -238,28 +239,30 @@ def get_dataloaders(
         else:
             raise ValueError(f"Unknown dataset type: {dataset_type}")
 
+    kwargs = dict(
+        input_dir=input_dir,
+        depth_dir=depth_dir,
+        batch_size=batch_size,
+        dataset_type=dataset_type,
+    )
+
     if dataset_type == "random" or dataset_type == "random_old":
         dataloader_constructor = setup_dataloader
     elif dataset_type == "sequence":
         dataloader_constructor = setup_sequence_dataloader
+        kwargs['preceding_frames'] = preceding_frames,
 
     train_dataloader = dataloader_constructor(
-        input_dir=input_dir,
-        depth_dir=depth_dir,
         folders=train_folders,
         cases=train_cases,
-        batch_size=batch_size,
-        dataset_type=dataset_type,
-        shuffle=True
+        shuffle=True,
+        **kwargs
     )
     valid_dataloader = dataloader_constructor(
-        input_dir=input_dir,
-        depth_dir=depth_dir,
         folders=valid_folders,
         cases=valid_cases,
-        batch_size=batch_size,
-        dataset_type=dataset_type,
-        shuffle=False
+        shuffle=False,
+        **kwargs
     )
 
     return train_dataloader, valid_dataloader
@@ -300,20 +303,20 @@ def test_get_dataloaders():
         batch_size=2,
     )
 
-    for i, (images, labels) in enumerate(valid_dataloader):
-        try:
-            img, lbl = images[0].numpy(), labels[0].numpy()
-            show_sample(img, lbl, dataset_type=args.dataset_type)
-        except Exception as e:
-            print(f"Error: {e}")
+    # for i, (images, labels) in enumerate(valid_dataloader):
+    #     try:
+    #         img, lbl = images[0].numpy(), labels[0].numpy()
+    #         show_sample(img, lbl, dataset_type=args.dataset_type)
+    #     except Exception as e:
+    #         print(f"Error: {e}")
 
-        if i > 3:
-            break
+    #     if i > 3:
+    #         break
 
-    # for images, labels in tqdm(train_dataloader):
-    #     pass
-    # for images, labels in tqdm(valid_dataloader):
-    #     pass
+    for images, labels in tqdm(train_dataloader):
+        print(images.shape, labels.shape)
+    for images, labels in tqdm(valid_dataloader):
+        print(images.shape, labels.shape)
 
 
 if __name__ == "__main__":
